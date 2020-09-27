@@ -1,4 +1,4 @@
-import IGmain
+import VImain
 import readData
 from collections import deque
 import sys
@@ -11,9 +11,9 @@ import pandas as pd
 
 class Tree:
     def __init__(self,val):
-        self.val = val
         self.left = None
         self.right = None
+        self.val = val
 
 
 class BuildTree:

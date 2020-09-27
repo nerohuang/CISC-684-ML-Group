@@ -22,7 +22,6 @@ class BuildTree:
 
         csvData = readData.readCSV(self,filename)
 
-        
         self.data = csvData.data
         self.Class = csvData.Class
         self.attributes = csvData.attributes

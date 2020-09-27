@@ -3,7 +3,7 @@ import sys
 from collections import defaultdict
 
 def main():
-    #directory="./data_sets1/data_sets1/"
+    directory="./data_sets1/data_sets1/"
     #directory="./data_sets2/data_sets2/"
 
     L = int(sys.argv[1])

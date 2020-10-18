@@ -10,10 +10,23 @@ from nltk.tokenize import wordpunct_tokenize
 
 classes = ['spam','ham']
 path = os.getcwd()
-training_ham_path = path + '/train/ham/'
-training_spam_path = path + '/train/spam/'
-test_ham_path = path + '/test/ham/'
-test_spam_path = path + '/test/spam/'
+#dataset1
+#training_ham_path = path + '/train/ham/'
+#training_spam_path = path + '/train/spam/'
+#test_ham_path = path + '/test/ham/'
+#test_spam_path = path + '/test/spam/'
+
+#dataset2
+#training_ham_path = path + '/enron1_train/enron1/train/ham/'
+#training_spam_path = path + '/enron1_train/enron1/train/spam/'
+#test_ham_path = path + '/enron1_test/enron1/test/ham/'
+#test_spam_path = path + '/enron1_test/enron1/test/spam/'
+
+#dataset3
+training_ham_path = path + '/enron4_train/enron4/train/ham/'
+training_spam_path = path + '/enron4_train/enron4/train/spam/'
+test_ham_path = path + '/enron4_test/enron4/test/ham/'
+test_spam_path = path + '/enron4_test/enron4/test/spam/'
 
 spam_train_size = len(fnmatch.filter(os.listdir(training_spam_path), '*.txt'))
 ham_train_size = len(fnmatch.filter(os.listdir(training_ham_path), '*.txt'))
@@ -53,7 +66,7 @@ def get_mail_from_file(file_name):
 stop_words_message = get_mail_from_file(path+'/' +'stop_words_list.txt')
 stop_words = get_words(stop_words_message, 'false')   
     
-def make_training_set(path, flag):
+def training_set(path, flag):
 
     training_set = {}
     mails_in_dir = [mail_file for mail_file in listdir(path) if isfile(join(path, mail_file))] 
@@ -110,9 +123,9 @@ if exists:
         ham_training_set = pickle.load(f)
 
 else:
-    spam_training_set = make_training_set(training_spam_path, 'false')
+    spam_training_set = training_set(training_spam_path, 'false')
     
-    ham_training_set = make_training_set(training_ham_path, 'false')
+    ham_training_set = training_set(training_ham_path, 'false')
    
     spam_unique_word_count = len(spam_training_set.keys())
     ham_unique_word_count = len(ham_training_set.keys())

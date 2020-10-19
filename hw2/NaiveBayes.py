@@ -11,10 +11,10 @@ from nltk.tokenize import wordpunct_tokenize
 classes = ['spam','ham']
 path = os.getcwd()
 #dataset1
-#training_ham_path = path + '/train/ham/'
-#training_spam_path = path + '/train/spam/'
-#test_ham_path = path + '/test/ham/'
-#test_spam_path = path + '/test/spam/'
+training_ham_path = path + '/train/ham/'
+training_spam_path = path + '/train/spam/'
+test_ham_path = path + '/test/ham/'
+test_spam_path = path + '/test/spam/'
 
 #dataset2
 #training_ham_path = path + '/enron1_train/enron1/train/ham/'
@@ -23,10 +23,10 @@ path = os.getcwd()
 #test_spam_path = path + '/enron1_test/enron1/test/spam/'
 
 #dataset3
-training_ham_path = path + '/enron4_train/enron4/train/ham/'
-training_spam_path = path + '/enron4_train/enron4/train/spam/'
-test_ham_path = path + '/enron4_test/enron4/test/ham/'
-test_spam_path = path + '/enron4_test/enron4/test/spam/'
+#training_ham_path = path + '/enron4_train/enron4/train/ham/'
+#training_spam_path = path + '/enron4_train/enron4/train/spam/'
+#test_ham_path = path + '/enron4_test/enron4/test/ham/'
+#test_spam_path = path + '/enron4_test/enron4/test/spam/'
 
 spam_train_size = len(fnmatch.filter(os.listdir(training_spam_path), '*.txt'))
 ham_train_size = len(fnmatch.filter(os.listdir(training_ham_path), '*.txt'))
@@ -166,12 +166,12 @@ else:
         pickle.dump(classification_ham, f, pickle.HIGHEST_PROTOCOL)
         
 def accuracy(classifications, classes):
-    result = 0
-    for term in classifications.keys():
+      result = 0
+      for term in classifications.keys():
         if classifications[term] == classes:
             result = result + 1
-    return result
-        
+      return result
+           
 ham_classified_as_ham = 0
 ham_classified_as_spam = 0
 spam_classified_as_spam = 0
@@ -181,5 +181,7 @@ ham_classified_as_spam = len(classification_ham) - ham_classified_as_ham
 spam_classified_as_spam = accuracy(classification_spam, 'spam')
 spam_classified_as_ham = len(classification_spam) - spam_classified_as_spam
 
-print("Test Data Accuracy on Ham dataset: ", ham_classified_as_ham/( ham_classified_as_spam + ham_classified_as_ham)*100," %")
-print("Test Data Accuracy on Spam dataset: ", spam_classified_as_spam/ (spam_classified_as_ham + spam_classified_as_spam)*100," %")
+ham_accuracy = ham_classified_as_ham/( ham_classified_as_spam + ham_classified_as_ham)
+spam_accuracy = spam_classified_as_spam/ (spam_classified_as_ham + spam_classified_as_spam)
+
+print("Test Data Accuracy on dataset: ", (ham_accuracy*len(classification_ham) + spam_accuracy*len(classification_spam))/(len(classification_ham)+len(classification_spam)) *100, "%")

@@ -19,9 +19,8 @@ def trainLR(features, vocab):
     for i in range(len(vocab) + 1):
         weightVector.append(0)
 
-    # eeta, lamb, iterations
+    # eeta,iterations
     eeta = 0.0001
-    lamb = 0.1
     i = 40;
 
     for i in range(1, i):
@@ -34,13 +33,13 @@ def trainLR(features, vocab):
             wixi = 0.0;
             for x in range(len(vocab) + 1):
                 wixi += weightVector[x] * feature.features[x];
-            predY = math.exp(wixi)/ (1 + math.exp(wixi));
+            predY = 1 / (1 + math.exp(wixi));
             error.append(actualY-predY);
         for index, w in enumerate(weightVector):
             allError = 0.0;
             for insIndex, feature in enumerate(features):
                 allError += feature.features[index] * error[insIndex];
-            weightVector[index] = (weightVector[index] + (eeta * allError) - (eeta * lamb * weightVector[index]));
+            weightVector[index] = (weightVector[index] + (eeta * allError));
     return weightVector;
 
 def predictLR(weights, featureVector):

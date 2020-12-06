@@ -1,62 +1,131 @@
-from numpy import numpy as np;
-from scipy.stats import multivariate_normal as mvn
+import numpy as np
+import math
+import random
 
-def estimage_gmm(x, pis, mus, sigmas, tol = 0.01, maxIter = 100):
 
-    n, p = x.shape;
-    k = len(pis);
+def calculatePr(x, mu, sigma):
+    return np.exp((((x - mu)/sigma)**2)/-2)/(sigma*math.sqrt(2*math.pi));
 
-    llOld = 0;
-
-    for i in range(maxIter):
-
+def calculateCluster(x, mu, sigma, alpha, k):
+    newMu = [];
+    newSigma = [];
+    newAlpha = [];
+    for i in range(k):
         #E-step:
-        ws = np.zeros((k, n));
-        for j in range(len(mus)):
-            for i in range(n):
-                ws[j, i] = pis[j] * mvn(mus[j], sigmas[j]).pdf(x[i]);
-        ws /= ws.sum(0);
+        pr = calculatePr(x, mu[i], math.sqrt(sigma[i]));
+        prAlpha = pr*alpha[i];
+        prSum = 0;
+        for j in range(len(alpha)):
+            curPr = calculatePr(x, mu[j], math.sqrt(sigma[i]));
+            prSum += curPr * alpha[j];
+        wik = np.divide(prAlpha, prSum)
 
-        #M - step:
-        pis = np.zeros(k);
-        for j in range(len(mus)):
-            for i in range(n):
-                pis[j] += ws[j, i];
-        pis /= n;
+        #M-step:
+        curNK = np.sum(wik);
+        curAlphaK = curNK / len(x);
+        curMuK = np.sum(np.multiply(wik, x))/np.sum(wik);
+        curSigma = np.sum(np.multiply(wik, np.square(x - curMuK)))/curNK;
 
-        mus = np.zeros((k, p));
-        for j in range(k):
-            for i in range(n):
-                mus[j] += ws[j, i] * x[i];
-            mus[j] /= ws[j, :].sum();
-        
-        sigames = np.zeros((k, p, p));
-        for j in range(k):
-            for i in range(n):
-                ys = np.reshape(x[i] - mus[j], (2, 1));
-                sigames[j] += ws[j, i] * np.dot(ys, ys.T);
-            sigames[j] /= ws[j, :].sum();
-        
-        #Update likelihood
-        llNew = 0.0;
-        for i in range(n):
-            s = 0;
-            for j in range(k):
-                s += pis[j] * mvn(mus[j], sigmas[j]).pdf(x[i]);
-            llNew += np.log(s);
-        
-        if np.abs(llNew - llOld) < tol:
-            break;
-        llOld = llNew;
-    
-    return llNew;
+        newMu.append(curMuK);
+        newAlpha.append(curAlphaK);
+        newSigma.append(curSigma);
+    return newMu, newAlpha, newSigma
 
-k = 1;
-pis = np.random.random(k);
-pis /= pis.sum();
-mus = np.random.random((k, 2))
-sigmas = np.array([np.eye(2)] * k)
+def modifyEM(x, mu, sigma, alpha, k):
+    newMu = [];
+    newAlpha = [];
+    for i in range(k):
+        #E-step:
+        pr = calculatePr(x, mu[i], sigma[i]);
+        prAlpha = pr*alpha[i];
+        prSum = 0;
+        for j in range(len(alpha)):
+            curPr = calculatePr(x, mu[j], sigma[j]);
+            prSum += curPr * alpha[j];
+        wik = np.divide(prAlpha, prSum)
 
-#read the data to x
+        #M-step:
+        curNK = np.sum(wik);
+        curMuK = np.sum(np.multiply(wik, x))/np.sum(wik);
+        curSigma = np.sum(np.multiply(wik, np.square(x - curMuK)))/curNK;
+
+        newMu.append(curMuK);
+        newSigma.append(curSigma);
+    return newMu, alpha, newSigma
 
 
+def calLog(x, mu, sigma, alpha):
+    count = 0;
+    for num in x:
+        curCount = 0;
+        for i in range(len(alpha)):
+            curPr = math.exp((((num - mu[i])/math.sqrt(sigma[i])) ** 2)/-2) / (math.sqrt(sigma[i]) * math.sqrt(2*math.pi));
+            curCount += alpha[i] * curPr;
+        count += math.log(curCount);
+    likelihood = count;
+    return likelihood;
+
+
+myFile = open("em_data.txt", "r");
+store = myFile.read().split("\n")[0:-1];
+x = np.array([float(num) for num in store]);
+
+mu = [];
+sigma = [];
+alpha = [];
+
+xMax = max(x);
+xMin = min(x);
+
+k = 1; #{1, 3, 5}
+
+for i in range(k):
+    mu.append(random.uniform(xMin, xMax));
+    sigma.append(random.uniform(xMin, xMax));
+    alpha.append(random.uniform(0, 1 - np.sum(alpha)));
+
+alpha[0] = 1 - (np.sum(alpha) - alpha[0])
+
+muChcek, sigmaCheck, alphaCheck = 1, 1, 1;
+
+while muChcek > 0.000000001 or sigmaCheck > 0.000000001 or alphaCheck > 0.000000001:
+    newMu, newSigma, newAlpha = calculateCluster(x, mu, sigma, alpha, k);
+    muChcek = abs(sum(mu) - sum(newMu)) / sum(mu);
+    sigmaCheck = abs(sum(sigma) - sum(newSigma)) / sum(sigma);
+    alphaCheck = abs(sum(alpha) - sum(alpha)) / sum(alpha);
+    mu = newMu;
+    sigma = newSigma;
+    alpha = newAlpha;
+
+likelihood = calLog(x, mu, sigma, alpha);
+
+print("Step 2:")
+print(mu);
+print(sigma);
+print(alpha);
+print(likelihood);
+
+#======================step 3==============
+
+for i in range(k):
+    mu.append(random.uniform(xMin, xMax));
+    alpha.append(random.uniform(0, 1 - np.sum(alpha)));
+
+sigma = [1 for _ in range(k)]
+
+muChcek, alphaCheck = 1, 1;
+
+while muChcek > 0.000000001 or alphaCheck > 0.000000001:
+    newMu, newSigma, newAlpha = calculateCluster(x, mu, sigma, alpha, k);
+    muChcek = abs(sum(mu) - sum(newMu)) / sum(mu);
+    alphaCheck = abs(sum(alpha) - sum(alpha)) / sum(alpha);
+    mu = newMu;
+    alpha = newAlpha;
+
+likelihood = calLog(x, mu, sigma, alpha);
+
+print("Step 3:")
+print(mu);
+print(sigma);
+print(alpha);
+print(likelihood);

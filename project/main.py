@@ -71,10 +71,10 @@ if __name__ == "__main__":
     f = open(filename, 'r')
     dataset = f.readlines();
 
-    k = 5
+    k = 7;
 
     print('K = ', k);
-
+    totalMeans = []
     for it in range(10):
         print(it + 1, " time itertion: ")
         print("==============================")
@@ -82,7 +82,8 @@ if __name__ == "__main__":
 
         iterationAc = [];
 
-        for i in range(k):
+        
+        for i in range(5):
             trainingDatas, testDatas = Foldcrossvalid(FFCBegin, FFCBegin + 0.2, dataset);
             FFCBegin += 0.2;
             predicteds = [];
@@ -108,3 +109,10 @@ if __name__ == "__main__":
         print(it + 1, " time itertion's means: ", statistics.mean(iterationAc));
         print(it + 1, " time itertion's STD: ", statistics.stdev(iterationAc));
         print("=============================")
+        totalMeans.append(statistics.mean(iterationAc));
+
+    print("============Total============");
+    print("Grand means:", statistics.mean(totalMeans));
+
+
+
